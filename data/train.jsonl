@@ -1,0 +1,12 @@
+{"instruction": "What is LoRA in one sentence?", "response": "LoRA (Low-Rank Adaptation) freezes a model's weights and trains small low-rank matrices, so you fine-tune a tiny fraction of parameters."}
+{"instruction": "What is QLoRA?", "response": "QLoRA loads the base model in 4-bit precision and trains LoRA adapters on top, letting you fine-tune large models on a single GPU."}
+{"instruction": "Why use parameter-efficient fine-tuning?", "response": "It cuts memory and compute by training only small adapters, and lets you keep many task-specific adapters over one frozen base model."}
+{"instruction": "What does the rank r control in LoRA?", "response": "r sets the size of the low-rank update: higher r adds capacity and trainable parameters, lower r is cheaper but less expressive."}
+{"instruction": "What is a target module in PEFT?", "response": "A target module is the layer LoRA is injected into, such as the attention projection, where the low-rank update is applied."}
+{"instruction": "Define retrieval-augmented generation.", "response": "RAG retrieves relevant documents and conditions the model's generation on them to ground answers and reduce hallucination."}
+{"instruction": "What is the Model Context Protocol?", "response": "MCP is an open standard that lets AI applications connect to tools and data through a uniform client/server interface."}
+{"instruction": "What is a ReAct agent?", "response": "A ReAct agent interleaves reasoning and tool use in a loop, calling tools and observing results until it can answer."}
+{"instruction": "Why freeze the base model during LoRA training?", "response": "Freezing preserves pretrained knowledge, slashes memory for optimizer states, and isolates the task adaptation in small adapters."}
+{"instruction": "What is gradient accumulation?", "response": "Gradient accumulation sums gradients over several micro-batches before an optimizer step, simulating a larger batch size on limited memory."}
+{"instruction": "What is the purpose of an evaluation set?", "response": "An evaluation set measures generalization on data not seen in training, guarding against overfitting and guiding model selection."}
+{"instruction": "What does perplexity measure?", "response": "Perplexity measures how well a language model predicts a sample; lower perplexity means the model is less surprised by the text."}

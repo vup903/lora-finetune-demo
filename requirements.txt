@@ -1,0 +1,9 @@
+torch>=2.2
+transformers>=4.44
+peft>=0.12
+datasets>=2.20
+accelerate>=0.33
+# Dev
+pytest>=8.0
+# QLoRA (4-bit) — CUDA only, install separately:
+# bitsandbytes>=0.43
