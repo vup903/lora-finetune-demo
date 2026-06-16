@@ -17,6 +17,18 @@ def format_example(example: dict) -> str:
     )
 
 
+def train_eval_split(rows: list[dict], eval_frac: float = 0.2, seed: int = 0) -> tuple[list[dict], list[dict]]:
+    """Shuffle and split rows into (train, eval). eval_frac<=0 returns (rows, [])."""
+    if eval_frac <= 0 or len(rows) < 2:
+        return list(rows), []
+    import random
+
+    shuffled = list(rows)
+    random.Random(seed).shuffle(shuffled)
+    k = max(1, int(len(shuffled) * eval_frac))
+    return shuffled[k:], shuffled[:k]
+
+
 def load_jsonl(path: str | Path) -> list[dict]:
     """Read a JSONL file into a list of dicts."""
     rows: list[dict] = []

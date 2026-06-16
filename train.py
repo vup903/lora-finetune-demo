@@ -11,7 +11,8 @@ import argparse
 
 from transformers import Trainer, TrainingArguments, default_data_collator
 
-from lora_finetune.data import build_dataset, load_jsonl
+from lora_finetune.data import build_dataset, load_jsonl, train_eval_split
+from lora_finetune.evaluate import evaluate_dataset
 from lora_finetune.model import build_lora_model, count_trainable, load_base_model
 
 
@@ -25,6 +26,8 @@ def parse_args():
     p.add_argument("--batch-size", type=int, default=2)
     p.add_argument("--r", type=int, default=8, help="LoRA rank")
     p.add_argument("--max-len", type=int, default=128)
+    p.add_argument("--eval-frac", type=float, default=0.0,
+                   help="Fraction of examples held out to report eval loss + perplexity after training")
     p.add_argument("--qlora", action="store_true", help="4-bit QLoRA (CUDA + bitsandbytes)")
     p.add_argument(
         "--target-modules", nargs="+", default=None,
@@ -52,7 +55,8 @@ def main():
     print(f"Trainable params: {trainable:,} / {total:,} ({100 * trainable / total:.3f}%)")
 
     rows = load_jsonl(args.data)
-    dataset = build_dataset(tokenizer, rows, max_len=args.max_len)
+    train_rows, eval_rows = train_eval_split(rows, eval_frac=args.eval_frac)
+    dataset = build_dataset(tokenizer, train_rows, max_len=args.max_len)
 
     training_args = TrainingArguments(
         output_dir=args.out,
@@ -70,6 +74,11 @@ def main():
         data_collator=default_data_collator,
     )
     trainer.train()
+
+    if eval_rows:
+        eval_dataset = build_dataset(tokenizer, eval_rows, max_len=args.max_len)
+        metrics = evaluate_dataset(model, eval_dataset, batch_size=args.batch_size)
+        print(f"Held-out eval: loss={metrics['eval_loss']:.4f}  perplexity={metrics['perplexity']:.2f}  (n={len(eval_rows)})")
 
     model.save_pretrained(args.out)
     tokenizer.save_pretrained(args.out)
