@@ -65,6 +65,16 @@ def build_lora_model(base_model, r: int = 8, alpha: int = 16, dropout: float = 0
     return get_peft_model(base_model, config)
 
 
+def merge_adapter(peft_model):
+    """Fold LoRA weights into the base model and return a standalone model.
+
+    After merging there are no PEFT/LoRA layers left, so the result can be saved
+    and loaded as a normal Transformers model (no adapter, no PEFT dependency at
+    inference) — useful for deployment.
+    """
+    return peft_model.merge_and_unload()
+
+
 def count_trainable(model) -> tuple[int, int]:
     """Return (trainable_param_count, total_param_count)."""
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
