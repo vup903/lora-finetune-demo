@@ -13,7 +13,12 @@ from transformers import Trainer, TrainingArguments, default_data_collator
 
 from lora_finetune.data import build_dataset, load_jsonl, train_eval_split
 from lora_finetune.evaluate import evaluate_dataset
-from lora_finetune.model import build_lora_model, count_trainable, load_base_model
+from lora_finetune.model import (
+    build_lora_model,
+    count_trainable,
+    enable_gradient_checkpointing,
+    load_base_model,
+)
 
 
 def parse_args():
@@ -28,6 +33,8 @@ def parse_args():
     p.add_argument("--max-len", type=int, default=128)
     p.add_argument("--eval-frac", type=float, default=0.0,
                    help="Fraction of examples held out to report eval loss + perplexity after training")
+    p.add_argument("--grad-checkpointing", action="store_true",
+                   help="Enable gradient checkpointing to reduce memory (trades compute)")
     p.add_argument("--qlora", action="store_true", help="4-bit QLoRA (CUDA + bitsandbytes)")
     p.add_argument(
         "--target-modules", nargs="+", default=None,
@@ -50,6 +57,8 @@ def main():
         model, r=args.r, target_modules=args.target_modules,
         fan_in_fan_out=not args.linear,
     )
+    if args.grad_checkpointing:
+        enable_gradient_checkpointing(model)
 
     trainable, total = count_trainable(model)
     print(f"Trainable params: {trainable:,} / {total:,} ({100 * trainable / total:.3f}%)")

@@ -65,6 +65,21 @@ def build_lora_model(base_model, r: int = 8, alpha: int = 16, dropout: float = 0
     return get_peft_model(base_model, config)
 
 
+def enable_gradient_checkpointing(model):
+    """Enable gradient checkpointing to cut activation memory (trades extra compute).
+
+    Also enables input grads (needed when the base is frozen, as with LoRA, so
+    gradients can flow back through checkpointed segments) and disables the
+    kv-cache (incompatible with checkpointing during training).
+    """
+    if hasattr(model, "config"):
+        model.config.use_cache = False
+    model.gradient_checkpointing_enable()
+    if hasattr(model, "enable_input_require_grads"):
+        model.enable_input_require_grads()
+    return model
+
+
 def merge_adapter(peft_model):
     """Fold LoRA weights into the base model and return a standalone model.
 
